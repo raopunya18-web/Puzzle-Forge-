@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Puzzle Forge — Auto‑Generated Sudoku, Crossword & Word Search</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg:#0b1020;--panel:#121734;--muted:#99a1c7;--text:#eaf0ff;--accent:#77a0ff;--accent2:#00e6a8;--warn:#ffd166;}
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(180deg,#0b1020,#11163a);color:var(--text)}
+    a{color:var(--accent)}
+    header{position:sticky;top:0;background:rgba(11,16,32,0.75);backdrop-filter:blur(8px);border-bottom:1px solid rgba(119,160,255,0.2);z-index:10}
+    nav{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 16px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
+    .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:grid;place-items:center;color:#0c122a}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .tab{padding:10px 14px;border-radius:12px;border:1px solid rgba(119,160,255,0.25);background:rgba(119,160,255,0.08);cursor:pointer}
+    .tab.active{background:linear-gradient(135deg,rgba(119,160,255,0.25),rgba(0,230,168,0.25));border-color:transparent}
+    main{max-width:1100px;margin:0 auto;padding:18px}
+    .panel{background:linear-gradient(180deg,rgba(18,23,52,0.95),rgba(18,23,52,0.7));border:1px solid rgba(119,160,255,0.2);border-radius:18px;padding:18px;box-shadow:0 10px 40px rgba(0,0,0,0.35)}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 16px}
+    .btn{padding:10px 14px;border-radius:12px;border:1px solid rgba(119,160,255,0.3);background:rgba(119,160,255,0.1);color:var(--text);font-weight:600;cursor:pointer}
+    .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0c122a;border:none}
+    .btn.warn{background:rgba(255,209,102,0.15);border:1px solid rgba(255,209,102,0.35);color:var(--warn)}
+    .hint{color:var(--muted);font-size:14px}
+
+    /* Sudoku */
+    .sudoku{display:grid;grid-template-columns:repeat(9,40px);gap:2px;user-select:none}
+    .cell{width:40px;height:40px;display:grid;place-items:center;background:#0f1440;border:1px solid rgba(119,160,255,0.15)}
+    .cell input{width:100%;height:100%;text-align:center;background:transparent;border:none;color:var(--text);font-size:18px;outline:none}
+    .cell.prefill input{font-weight:800;color:#bcd3ff}
+    .thick-right{border-right:2px solid rgba(255,255,255,0.18)}
+    .thick-bottom{border-bottom:2px solid rgba(255,255,255,0.18)}
+
+    /* Word Search */
+    .ws-grid{display:grid;grid-template-columns:repeat(var(--n,12),32px);gap:2px}
+    .ws-cell{width:32px;height:32px;display:grid;place-items:center;background:#0f1440;border:1px solid rgba(119,160,255,0.15);font-weight:700}
+    .ws-found{background:rgba(0,230,168,0.25)}
+
+    /* Crossword */
+    .cw-grid{--s:28px;display:grid;grid-template-columns:repeat(var(--n,11),var(--s));gap:2px}
+    .cw-cell{width:var(--s);height:var(--s);display:grid;place-items:center;background:#0f1440;border:1px solid rgba(119,160,255,0.15);position:relative}
+    .cw-black{background:#0b0f2b}
+    .cw-cell input{width:100%;height:100%;text-transform:uppercase;text-align:center;background:transparent;border:none;color:var(--text);font-size:16px;outline:none}
+    .cw-num{position:absolute;top:2px;left:4px;font-size:10px;color:#a9b6e8}
+
+    .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media (max-width: 960px){.cols{grid-template-columns:1fr}}
+    .list{background:rgba(12,18,56,0.6);border:1px solid rgba(119,160,255,0.15);border-radius:12px;padding:12px}
+    .list h4{margin:6px 0}
+    .list ul{margin:0;padding-left:18px}
+    footer{color:var(--muted);text-align:center;padding:28px}
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="brand"><div class="logo">PF</div><span>Puzzle Forge</span></div>
+      <div class="tabs">
+        <button class="tab active" data-tab="sudoku">Sudoku</button>
+        <button class="tab" data-tab="crossword">Crossword</button>
+        <button class="tab" data-tab="wordsearch">Word Search</button>
+        <button class="tab" data-tab="riddles">Riddles</button>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- SUDOKU -->
+    <section id="sudoku" class="panel">
+      <h2>Sudoku — auto‑generated</h2>
+      <div class="controls">
+        <select id="sudDiff" class="btn">
+          <option value="35">Easy</option>
+          <option value="45" selected>Medium</option>
+          <option value="55">Hard</option>
+        </select>
+        <button class="btn primary" id="newSud">New Sudoku</button>
+        <button class="btn" id="checkSud">Check</button>
+        <button class="btn warn" id="solveSud">Solve</button>
+        <span class="hint">Tip: only digits 1–9. Prefilled numbers are locked.</span>
+      </div>
+      <div id="sudokuGrid" class="sudoku" aria-label="Sudoku grid"></div>
+    </section>
+
+    <!-- CROSSWORD -->
+    <section id="crossword" class="panel" style="display:none">
+      <h2>Mini Crossword — auto‑generated</h2>
+      <div class="controls">
+        <button class="btn primary" id="newCw">New Crossword</button>
+        <button class="btn" id="cwCheck">Check</button>
+        <button class="btn warn" id="cwReveal">Reveal</button>
+        <span class="hint">Auto‑generated from a small word list with clues.</span>
+      </div>
+      <div class="cols">
+        <div>
+          <div id="cwGrid" class="cw-grid" style="--n:11"></div>
+        </div>
+        <div class="list">
+          <h4>Clues</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div>
+              <strong>Across</strong>
+              <ul id="cwAcross"></ul>
+            </div>
+            <div>
+              <strong>Down</strong>
+              <ul id="cwDown"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WORD SEARCH -->
+    <section id="wordsearch" class="panel" style="display:none">
+      <h2>Word Search — auto‑generated</h2>
+      <div class="controls">
+        <button class="btn primary" id="newWs">New Word Search</button>
+        <button class="btn" id="wsReveal">Reveal Words</button>
+        <span class="hint">Find the hidden words in any direction.</span>
+      </div>
+      <div class="cols">
+        <div id="wsGrid" class="ws-grid" style="--n:12"></div>
+        <div class="list">
+          <h4>Words</h4>
+          <ul id="wsWords"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIDDLES -->
+    <section id="riddles" class="panel" style="display:none">
+      <h2>Riddles — endless & random</h2>
+      <div class="controls">
+        <button class="btn primary" id="newRid">New Riddle</button>
+        <button class="btn" id="showAns">Show Answer</button>
+      </div>
+      <div class="list">
+        <h4 id="riddleQ">Click “New Riddle”.</h4>
+        <p id="riddleA" class="hint"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>© <span id="yr"></span> Puzzle Forge — All puzzles are generated in your browser.</footer>
+
+  <script>
+    // ======= TAB SWITCHING =======
+    document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      b.classList.add('active');
+      const id=b.dataset.tab;
+      document.querySelectorAll('main section').forEach(s=>s.style.display='none');
+      document.getElementById(id).style.display='block';
+    }));
+
+    document.getElementById('yr').textContent=new Date().getFullYear();
+
+    // ======= SUDOKU GENERATOR =======
+    const SUD = { size:9, box:3 };
+
+    function makeEmpty(){ return Array.from({length:9},()=>Array(9).fill(0)); }
+
+    function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+
+    function isSafe(board,r,c,n){
+      for(let i=0;i<9;i++){ if(board[r][i]==n||board[i][c]==n) return false; }
+      const br=r-r%3, bc=c-c%3; for(let i=0;i<3;i++) for(let j=0;j<3;j++) if(board[br+i][bc+j]==n) return false; return true;
+    }
+
+    function solveBoard(board){
+      for(let r=0;r<9;r++){
+        for(let c=0;c<9;c++){
+          if(board[r][c]===0){
+            for(const n of shuffle([1,2,3,4,5,6,7,8,9])){
+              if(isSafe(board,r,c,n)){ board[r][c]=n; if(solveBoard(board)) return true; board[r][c]=0; }
+            }
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    function generateSudoku(holes=45){
+      const board=makeEmpty(); solveBoard(board);
+      // holes: remove cells while keeping a valid puzzle (not enforcing uniqueness for speed)
+      let removed=0; const attempts=81*2; let tries=0;
+      while(removed<holes && tries<attempts){
+        tries++;
+        const r=Math.floor(Math.random()*9), c=Math.floor(Math.random()*9);
+        if(board[r][c]!==0){ board[r][c]=0; removed++; }
+      }
+      return board;
+    }
+
+    const sudGrid = document.getElementById('sudokuGrid');
+    let sudSolution = null; let sudPrefill = null;
+
+    function renderSudoku(puzzle, solution){
+      sudGrid.innerHTML='';
+      for(let r=0;r<9;r++){
+        for(let c=0;c<9;c++){
+          const v=puzzle[r][c];
+          const cell=document.createElement('div');
+          cell.className='cell'+((c%3===2 && c!==8)?' thick-right':'')+((r%3===2 && r!==8)?' thick-bottom':'');
+          const input=document.createElement('input');
+          input.setAttribute('inputmode','numeric');
+          input.maxLength=1;
+          if(v!==0){ input.value=v; input.disabled=true; cell.classList.add('prefill'); }
+          input.addEventListener('input',()=>{ input.value=input.value.replace(/[^1-9]/g,''); });
+          cell.appendChild(input); sudGrid.appendChild(cell);
+        }
+      }
+    }
+
+    function getSudokuState(){
+      const vals=[]; const inputs=sudGrid.querySelectorAll('input');
+      for(let i=0;i<81;i++){
+        const r=Math.floor(i/9), c=i%9; const inp=inputs[i];
+        vals[r]||(vals[r]=[]); vals[r][c]= inp.disabled? Number(inp.value) : (inp.value?Number(inp.value):0);
+      }
+      return vals;
+    }
+
+    function sudNew(){
+      const holes=parseInt(document.getElementById('sudDiff').value,10);
+      const full=makeEmpty(); solveBoard(full);
+      sudSolution = full.map(row=>row.slice());
+      const puzzle=full.map(row=>row.slice());
+      // remove
+      let count=0; while(count<holes){ const r=Math.floor(Math.random()*9), c=Math.floor(Math.random()*9); if(puzzle[r][c]!==0){ puzzle[r][c]=0; count++; } }
+      sudPrefill=puzzle.map(row=>row.slice());
+      renderSudoku(puzzle, sudSolution);
+    }
+
+    function sudCheck(){
+      const cur=getSudokuState();
+      const inputs=sudGrid.querySelectorAll('input');
+      for(let i=0;i<81;i++){
+        const r=Math.floor(i/9), c=i%9; const v=cur[r][c];
+        if(!inputs[i].disabled){
+          if(v===0) { inputs[i].style.background='rgba(255,209,102,0.15)'; }
+          else if(v!==sudSolution[r][c]){ inputs[i].style.background='rgba(255,82,82,0.25)'; }
+          else { inputs[i].style.background='rgba(0,230,168,0.25)'; }
+        }
+      }
+    }
+
+    function sudSolve(){
+      const inputs=sudGrid.querySelectorAll('input');
+      for(let i=0;i<81;i++){ if(!inputs[i].disabled){ const r=Math.floor(i/9), c=i%9; inputs[i].value=sudSolution[r][c]; inputs[i].style.background=''; } }
+    }
+
+    document.getElementById('newSud').addEventListener('click',sudNew);
+    document.getElementById('checkSud').addEventListener('click',sudCheck);
+    document.getElementById('solveSud').addEventListener('click',sudSolve);
+
+    // initialize
+    sudNew();
+
+    // ======= WORD SEARCH =======
+    const WS = {
+      size: 12,
+      words: [
+        'ALGORITHM','BROWSER','PYTHON','JAVASCRIPT','PUZZLE','MATRIX','VECTOR','GRAPH','NUMBER','LETTER','RANDOM','LOGIC'
+      ]
+    };
+
+    const DIRS=[[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
+
+    function wsNew(){
+      const N=WS.size; const grid=Array.from({length:N},()=>Array(N).fill(''));
+      const placed=[];
+      for(const w0 of WS.words){
+        const W=w0.toUpperCase();
+        let placedFlag=false; let attempts=0;
+        while(!placedFlag && attempts<200){
+          attempts++;
+          const [dr,dc]=DIRS[Math.floor(Math.random()*DIRS.length)];
+          const r0=Math.floor(Math.random()*N), c0=Math.floor(Math.random()*N);
+          const r1=r0+dr*(W.length-1), c1=c0+dc*(W.length-1);
+          if(r1<0||r1>=N||c1<0||c1>=N) continue;
+          let ok=true; for(let k=0;k<W.length;k++){ const r=r0+dr*k,c=c0+dc*k; if(grid[r][c]!=='' && grid[r][c]!==W[k]){ ok=false; break; } }
+          if(!ok) continue;
+          for(let k=0;k<W.length;k++){ const r=r0+dr*k,c=c0+dc*k; grid[r][c]=W[k]; }
+          placed.push({word:W, cells:Array.from({length:W.length},(_,k)=>[r0+dr*k,c0+dc*k])});
+          placedFlag=true;
+        }
+      }
+      // fill blanks
+      const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      for(let r=0;r<N;r++) for(let c=0;c<N;c++) if(grid[r][c]==='') grid[r][c]=letters[Math.floor(Math.random()*26)];
+      renderWS(grid, placed);
+    }
+
+    const wsGrid=document.getElementById('wsGrid');
+    const wsWords=document.getElementById('wsWords');
+    let wsPlaced=[];
+
+    function renderWS(grid, placed){
+      wsGrid.style.setProperty('--n', grid.length);
+      wsGrid.innerHTML=''; wsWords.innerHTML=''; wsPlaced=placed;
+      for(let r=0;r<grid.length;r++){
+        for(let c=0;c<grid.length;c++){
+          const d=document.createElement('div'); d.className='ws-cell'; d.textContent=grid[r][c]; d.dataset.r=r; d.dataset.c=c; wsGrid.appendChild(d);
+        }
+      }
+      placed.forEach(p=>{ const li=document.createElement('li'); li.textContent=p.word; wsWords.appendChild(li); });
+    }
+
+    document.getElementById('newWs').addEventListener('click', wsNew);
+    document.getElementById('wsReveal').addEventListener('click', ()=>{
+      const map=new Set(wsPlaced.flatMap(p=>p.cells.map(([r,c])=>`${r},${c}`)));
+      wsGrid.querySelectorAll('.ws-cell').forEach(cell=>{
+        if(map.has(`${cell.dataset.r},${cell.dataset.c}`)) cell.classList.add('ws-found');
+      });
+    });
+
+    wsNew();
+
+    // ======= MINI CROSSWORD (simple criss‑cross) =======
+    const WORDS=[
+      ['ALPHA','First letter'],['BRAVE','Courageous'],['CLOUD','Sky storage'],['DELTA','Greek letter'],['EARTH','Our planet'],['FAITH','Belief'],['GIANT','Very large'],['HONEY','Bee product'],['IVORY','Pale material'],['JELLY','Wobbly dessert'],['KNIFE','Sharp tool'],['LEMON','Sour fruit'],['MAGIC','Illusion art'],['NINJA','Stealthy fighter'],['OCEAN','Big sea'],['PEARL','Gem from oyster'],['QUART','Liquid measure'],['ROBOT','Automaton'],['SOLAR','Sun-powered'],['TIGER','Striped cat'],['ULTRA','Very extreme'],['VIVID','Bright'],['WATER','H2O'],['XENON','Noble gas'],['YOUNG','Not old'],['ZEBRA','Striped animal']
+    ];
+
+    const CWN=11;
+
+    function cwNew(){
+      const grid=Array.from({length:CWN},()=>Array(CWN).fill('#'));
+      // place the longest word in the center horizontally
+      const words=shuffle(WORDS.slice()).slice(0,12);
+      words.sort((a,b)=>b[0].length-a[0].length);
+      const [w0,cl0]=words[0];
+      const r=Math.floor(CWN/2), c=Math.floor((CWN-w0.length)/2);
+      for(let i=0;i<w0.length;i++) grid[r][c+i]=w0[i];
+      const placed=[{word:w0, clue:cl0, r, c, dir:'A'}];
+      // try to place remaining words intersecting
+      for(let idx=1; idx<words.length; idx++){
+        const [w,cl]=words[idx]; let done=false;
+        for(let i=0;i<placed.length && !done;i++){
+          const pw=placed[i].word;
+          for(let pi=0;pi<pw.length && !done;pi++){
+            const letter=pw[pi];
+            for(let wi=0;wi<w.length && !done;wi++) if(w[wi]===letter){
+              // try perpendicular placement
+              if(placed[i].dir==='A'){
+                const rr=placed[i].r-wi, cc=placed[i].c+pi;
+                if(fitDown(grid, w, rr, cc)) { putDown(grid, w, rr, cc); placed.push({word:w, clue:cl, r:rr, c:cc, dir:'D'}); done=true; }
+              } else {
+                const rr=placed[i].r+pi, cc=placed[i].c-wi;
+                if(fitAcross(grid, w, rr, cc)) { putAcross(grid, w, rr, cc); placed.push({word:w, clue:cl, r:rr, c:cc, dir:'A'}); done=true; }
+              }
+            }
+          }
+        }
+      }
+      // carve blacks -> convert remaining '#' to blacks, ensure bounds
+      renderCW(grid, placed);
+    }
+
+    function inb(r,c){ return r>=0 && r<CWN && c>=0 && c<CWN; }
+
+    function fitAcross(g, w, r, c){
+      if(!inb(r,c) || !inb(r, c+w.length-1)) return false;
+      // boundary check: left/right must be # or edge
+      if(inb(r,c-1) && g[r][c-1]!== '#') return false;
+      if(inb(r,c+w.length) && g[r][c+w.length]!== '#') return false;
+      for(let i=0;i<w.length;i++){
+        const rr=r, cc=c+i; if(!inb(rr,cc)) return false;
+        if(g[rr][cc]!=='#' && g[rr][cc]!==w[i]) return false;
+        // orthogonals must be # if not this word
+        if(inb(rr-1,cc) && g[rr-1][cc] !== '#') if(g[rr][cc]!==w[i]) return false;
+        if(inb(rr+1,cc) && g[rr+1][cc] !== '#') if(g[rr][cc]!==w[i]) return false;
+      }
+      return true;
+    }
+
+    function fitDown(g, w, r, c){
+      if(!inb(r,c) || !inb(r+w.length-1, c)) return false;
+      if(inb(r-1,c) && g[r-1][c]!== '#') return false;
+      if(inb(r+w.length,c) && g[r+w.length][c]!== '#') return false;
+      for(let i=0;i<w.length;i++){
+        const rr=r+i, cc=c; if(!inb(rr,cc)) return false;
+        if(g[rr][cc]!=='#' && g[rr][cc]!==w[i]) return false;
+        if(inb(rr,cc-1) && g[rr][cc-1] !== '#') if(g[rr][cc]!==w[i]) return false;
+        if(inb(rr,cc+1) && g[rr][cc+1] !== '#') if(g[rr][cc]!==w[i]) return false;
+      }
+      return true;
+    }
+
+    function putAcross(g,w,r,c){ for(let i=0;i<w.length;i++) g[r][c+i]=w[i]; }
+    function putDown(g,w,r,c){ for(let i=0;i<w.length;i++) g[r+i][c]=w[i]; }
+
+    const cwGrid=document.getElementById('cwGrid');
+    const cwAcross=document.getElementById('cwAcross');
+    const cwDown=document.getElementById('cwDown');
+    let cwPlaced=[];
+
+    function renderCW(g, placed){
+      cwGrid.innerHTML=''; cwAcross.innerHTML=''; cwDown.innerHTML=''; cwPlaced=placed;
+      // produce numbering
+      const startNum=1; let num=startNum; const numbers={};
+      for(let r=0;r<CWN;r++){
+        for(let c=0;c<CWN;c++){
+          const ch=g[r][c];
+          const cell=document.createElement('div'); cell.className='cw-cell';
+          if(ch==='#'){ cell.classList.add('cw-black'); cwGrid.appendChild(cell); continue; }
+          const inp=document.createElement('input'); inp.maxLength=1; inp.dataset.r=r; inp.dataset.c=c; inp.value='';
+          cell.appendChild(inp);
+          // numbering rules
+          const startA = (c===0 || g[r][c-1]==='#') && (c+1<CWN) && g[r][c+1] !== '#';
+          const startD = (r===0 || g[r-1][c]==='#') && (r+1<CWN) && g[r+1][c] !== '#';
+          if(startA || startD){ const span=document.createElement('span'); span.className='cw-num'; span.textContent=num; cell.appendChild(span); }
+          if(startA){ const word=readAcross(g,r,c); numbers[`A-${r}-${c}`]=num; const clue=findClue(placed,r,c,'A'); const li=document.createElement('li'); li.textContent=`${num}. ${clue}`; cwAcross.appendChild(li); }
+          if(startD){ const word=readDown(g,r,c); numbers[`D-${r}-${c}`]=num; const clue=findClue(placed,r,c,'D'); const li=document.createElement('li'); li.textContent=`${num}. ${clue}`; cwDown.appendChild(li); }
+          if(startA||startD) num++;
+          cwGrid.appendChild(cell);
+        }
+      }
+      // store solution for check/reveal
+      cwSolution = g.map(row=>row.map(ch=> ch==='#'?'#':ch));
+    }
+
+    function readAcross(g,r,c){ let s=''; while(c<CWN && g[r][c]!=='#'){ s+=g[r][c]; c++; } return s; }
+    function readDown(g,r,c){ let s=''; while(r<CWN && g[r][c]!=='#'){ s+=g[r][c]; r++; } return s; }
+
+    function findClue(placed,r,c,dir){
+      for(const p of cwPlaced){
+        if(p.dir===dir){
+          if(dir==='A' && p.r===r && p.c===c) return p.clue;
+          if(dir==='D' && p.r===r && p.c===c) return p.clue;
+        }
+      }
+      // fallback generic
+      return 'Fill in';
+    }
+
+    function cwCheck(){
+      const inputs=cwGrid.querySelectorAll('input');
+      inputs.forEach(inp=>{
+        const r=+inp.dataset.r, c=+inp.dataset.c; const sol=cwSolution[r][c];
+        if(inp.value){ inp.value=inp.value.toUpperCase(); }
+        if(inp.value==='') inp.style.background='rgba(255,209,102,0.15)';
+        else if(inp.value.toUpperCase()!==sol) inp.style.background='rgba(255,82,82,0.25)';
+        else inp.style.background='rgba(0,230,168,0.25)';
+      });
+    }
+    function cwReveal(){
+      const inputs=cwGrid.querySelectorAll('input');
+      inputs.forEach(inp=>{ const r=+inp.dataset.r, c=+inp.dataset.c; inp.value=cwSolution[r][c]; inp.style.background=''; });
+    }
+
+    document.getElementById('newCw').addEventListener('click', cwNew);
+    document.getElementById('cwCheck').addEventListener('click', cwCheck);
+    document.getElementById('cwReveal').addEventListener('click', cwReveal);
+
+    let cwSolution=null; cwNew();
+
+    // ======= RIDDLES =======
+    const RIDDLES=[
+      ['What has to be broken before you can use it?','An egg.'],
+      ['I speak without a mouth and hear without ears. I have nobody, but I come alive with wind. What am I?','An echo.'],
+      ['What can travel around the world while staying in a corner?','A stamp.'],
+      ['The more of this there is, the less you see. What is it?','Darkness.'],
+      ['What gets wetter the more it dries?','A towel.'],
+      ['I’m tall when I’m young, and I’m short when I’m old. What am I?','A candle.'],
+      ['What has many keys but can’t open a single lock?','A piano.'],
+      ['What can you keep after giving it to someone?','Your word.']
+    ];
+
+    function newRiddle(){ const [q,a]=RIDDLES[Math.floor(Math.random()*RIDDLES.length)]; document.getElementById('riddleQ').textContent=q; const ans=document.getElementById('riddleA'); ans.textContent=''; ans.dataset.ans=a; }
+    function showAns(){ const ans=document.getElementById('riddleA'); ans.textContent=ans.dataset.ans||''; }
+
+    document.getElementById('newRid').addEventListener('click', newRiddle);
+    document.getElementById('showAns').addEventListener('click', showAns);
+    newRiddle();
+  </script>
+</body>
+</html>
